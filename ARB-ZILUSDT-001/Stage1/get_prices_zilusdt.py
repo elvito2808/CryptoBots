@@ -2,64 +2,49 @@ import ccxt
 import requests
 import time
 
-# تابع برای گرفتن قیمت از KuCoin
+# Function to fetch price from KuCoin
 def get_kucoin_price():
     try:
-        # ایجاد نمونه از صرافی KuCoin با کتابخونه ccxt
         kucoin = ccxt.kucoin()
-        # گرفتن داده‌های ticker برای جفت‌ارز ZIL/USDT
         ticker = kucoin.fetch_ticker('ZIL/USDT')
-        # قیمت bid (بالاترین قیمت خرید) و ask (کمترین قیمت فروش)
         return {
             'bid': ticker['bid'],
             'ask': ticker['ask'],
             'timestamp': ticker['timestamp']
         }
     except Exception as e:
-        print(f"خطا در گرفتن قیمت از KuCoin: {e}")
+        print(f"Error fetching price from KuCoin: {e}")
         return None
 
-# تابع برای گرفتن قیمت از Zilswap
+# Function to fetch price from Zilswap (commented out for now)
 def get_zilswap_price():
     try:
-        # فرض می‌کنیم Zilswap یه API ساده داره
-        # این URL فقط نمونه‌ست، باید با API واقعی جایگزین بشه
-        url = "https://api.zilswap.io/pairs/ZIL-zUSDT"
+        url = "https://api.zilswap.io/pairs/ZIL-zUSDT"  # Placeholder URL
         response = requests.get(url)
         data = response.json()
-        # فرض می‌کنیم API قیمت bid و ask رو برمی‌گردونه
         return {
             'bid': data['bid'],
             'ask': data['ask'],
             'timestamp': data['timestamp']
         }
     except Exception as e:
-        print(f"خطا در گرفتن قیمت از Zilswap: {e}")
+        print(f"Error fetching price from Zilswap: {e}")
         return None
 
-# تابع برای مقایسه قیمت‌ها
+# Function to compare prices
 def compare_prices():
     kucoin_price = get_kucoin_price()
-    zilswap_price = get_zilswap_price()
+    # zilswap_price = get_zilswap_price()  # Commented out to test KuCoin only
 
-    if kucoin_price and zilswap_price:
-        print("قیمت‌ها در KuCoin:")
+    if kucoin_price:
+        print("KuCoin prices:")
         print(f"Bid: {kucoin_price['bid']}, Ask: {kucoin_price['ask']}")
-        print("قیمت‌ها در Zilswap:")
-        print(f"Bid: {zilswap_price['bid']}, Ask: {zilswap_price['ask']}")
-
-        # محاسبه تفاوت قیمت (برای آربیتراژ)
-        spread_buy = zilswap_price['bid'] - kucoin_price['ask']  # خرید از KuCoin، فروش در Zilswap
-        spread_sell = kucoin_price['bid'] - zilswap_price['ask']  # خرید از Zilswap، فروش در KuCoin
-
-        print(f"فرصت آربیتراژ (خرید از KuCoin، فروش در Zilswap): {spread_buy:.6f} USDT")
-        print(f"فرصت آربیتراژ (خرید از Zilswap، فروش در KuCoin): {spread_sell:.6f} USDT")
     else:
-        print("نمی‌تونم قیمت‌ها رو مقایسه کنم. لطفاً دوباره امتحان کن.")
+        print("Failed to fetch KuCoin prices. Please try again.")
 
-# اجرای اسکریپت
+# Main execution
 if __name__ == "__main__":
     while True:
         compare_prices()
-        print("منتظر 10 ثانیه برای به‌روزرسانی بعدی...")
-        time.sleep(10)  # هر 10 ثانیه قیمت‌ها رو چک می‌کنه
+        print("Waiting 10 seconds for the next update...")
+        time.sleep(10)
