@@ -17,17 +17,22 @@ def get_kucoin_price():
         return None
 
 # Function to fetch price from Zilswap
-def get_zilswap_price():
+def get_zilswap_price(zusdt_token_address="zil1exampleaddress"):
     try:
-        url = "https://stats.zilswap.org/pools/ZIL-zUSDT"  # Hypothetical endpoint
+        url = f"https://stats.zilswap.org/liquidity?pool=zil1sxx29cshups269ahh5qjffyr58mxjv9ft78jqy"
         response = requests.get(url, timeout=10)
         data = response.json()
-        # Assuming the API returns bid/ask or pool data
-        return {
-            'bid': data.get('bid', 0),  # Adjust based on actual API response
-            'ask': data.get('ask', 0),
-            'timestamp': int(time.time() * 1000)
-        }
+        # Assuming the API returns pool reserves
+        zil_amount = data.get('reserves', {}).get('ZIL', 0)
+        zusdt_amount = data.get('reserves', {}).get('zUSDT', 0)
+        if zil_amount and zusdt_amount:
+            price = zusdt_amount / zil_amount  # Calculate ZIL/zUSDT price
+            return {
+                'bid': price,  # Simplified: using same price for bid/ask
+                'ask': price,
+                'timestamp': int(time.time() * 1000)
+            }
+        return None
     except Exception as e:
         print(f"Error fetching price from Zilswap: {e}")
         return None
