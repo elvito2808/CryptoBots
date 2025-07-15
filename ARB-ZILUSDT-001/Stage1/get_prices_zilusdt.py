@@ -16,16 +16,17 @@ def get_kucoin_price():
         print(f"Error fetching price from KuCoin: {e}")
         return None
 
-# Function to fetch price from Zilswap (commented out for now)
+# Function to fetch price from Zilswap
 def get_zilswap_price():
     try:
-        url = "https://api.zilswap.io/pairs/ZIL-zUSDT"  # Placeholder URL
-        response = requests.get(url)
+        url = "https://stats.zilswap.org/pools/ZIL-zUSDT"  # Hypothetical endpoint
+        response = requests.get(url, timeout=10)
         data = response.json()
+        # Assuming the API returns bid/ask or pool data
         return {
-            'bid': data['bid'],
-            'ask': data['ask'],
-            'timestamp': data['timestamp']
+            'bid': data.get('bid', 0),  # Adjust based on actual API response
+            'ask': data.get('ask', 0),
+            'timestamp': int(time.time() * 1000)
         }
     except Exception as e:
         print(f"Error fetching price from Zilswap: {e}")
@@ -34,13 +35,22 @@ def get_zilswap_price():
 # Function to compare prices
 def compare_prices():
     kucoin_price = get_kucoin_price()
-    # zilswap_price = get_zilswap_price()  # Commented out to test KuCoin only
+    zilswap_price = get_zilswap_price()
 
-    if kucoin_price:
+    if kucoin_price and zilswap_price:
         print("KuCoin prices:")
         print(f"Bid: {kucoin_price['bid']}, Ask: {kucoin_price['ask']}")
+        print("Zilswap prices:")
+        print(f"Bid: {zilswap_price['bid']}, Ask: {zilswap_price['ask']}")
+
+        # Calculate arbitrage opportunities
+        spread_buy = zilswap_price['bid'] - kucoin_price['ask']  # Buy on KuCoin, sell on Zilswap
+        spread_sell = kucoin_price['bid'] - zilswap_price['ask']  # Buy on Zilswap, sell on KuCoin
+
+        print(f"Arbitrage opportunity (Buy KuCoin, Sell Zilswap): {spread_buy:.6f} USDT")
+        print(f"Arbitrage opportunity (Buy Zilswap, Sell KuCoin): {spread_sell:.6f} USDT")
     else:
-        print("Failed to fetch KuCoin prices. Please try again.")
+        print("Failed to compare prices. Please try again.")
 
 # Main execution
 if __name__ == "__main__":
